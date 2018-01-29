@@ -11,6 +11,7 @@ import io.github.droidkaigi.confsched2018.R
 import io.github.droidkaigi.confsched2018.model.Session
 import io.github.droidkaigi.confsched2018.presentation.about.AboutThisAppActivity
 import io.github.droidkaigi.confsched2018.presentation.about.AboutThisAppFragment
+import io.github.droidkaigi.confsched2018.presentation.common.view.SpeakersSummaryLayout
 import io.github.droidkaigi.confsched2018.presentation.contributor.ContributorsActivity
 import io.github.droidkaigi.confsched2018.presentation.contributor.ContributorsFragment
 import io.github.droidkaigi.confsched2018.presentation.detail.SessionDetailActivity
@@ -109,8 +110,9 @@ class NavigationController @Inject constructor(private val activity: AppCompatAc
         StaffActivity.start(activity)
     }
 
-    fun navigateToSessionDetailActivity(session: Session) {
-        SessionDetailActivity.start(activity, session)
+    fun navigateToSessionDetailActivity(session: Session,
+                                        speakersSummary: SpeakersSummaryLayout? = null) {
+        SessionDetailActivity.startWithAnimation(activity, session, speakersSummary)
     }
 
     fun navigateToMapActivity() {

@@ -5,6 +5,7 @@ import io.github.droidkaigi.confsched2018.R
 import io.github.droidkaigi.confsched2018.databinding.ItemSpeechSessionBinding
 import io.github.droidkaigi.confsched2018.model.Level
 import io.github.droidkaigi.confsched2018.model.Session
+import io.github.droidkaigi.confsched2018.presentation.common.view.SpeakersSummaryLayout
 import io.github.droidkaigi.confsched2018.util.ext.context
 import io.github.droidkaigi.confsched2018.util.ext.drawable
 import java.util.Calendar
@@ -20,6 +21,8 @@ data class SpeechSessionItem(
 ) : BindableItem<ItemSpeechSessionBinding>(
         session.id.toLong()
 ), SessionItem {
+
+    lateinit var speakersSummary: SpeakersSummaryLayout
 
     override fun bind(viewBinding: ItemSpeechSessionBinding, position: Int) {
         viewBinding.session = session
@@ -40,6 +43,8 @@ data class SpeechSessionItem(
             is Level.Niche -> R.drawable.ic_niche_cyan_20dp
         })
         viewBinding.level.setImageDrawable(levelDrawable)
+
+        speakersSummary = viewBinding.speakersSummary
     }
 
     override fun getLayout(): Int = R.layout.item_speech_session

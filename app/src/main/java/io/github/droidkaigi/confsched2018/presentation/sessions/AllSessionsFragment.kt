@@ -109,7 +109,8 @@ class AllSessionsFragment : Fragment(), Injectable {
             add(sessionsSection)
             setOnItemClickListener({ item, _ ->
                 val sessionItem = item as? SpeechSessionItem ?: return@setOnItemClickListener
-                navigationController.navigateToSessionDetailActivity(sessionItem.session)
+                navigationController.navigateToSessionDetailActivity(sessionItem.session,
+                                                                     sessionItem.speakersSummary)
             })
         }
         binding.sessionsRecycler.apply {
