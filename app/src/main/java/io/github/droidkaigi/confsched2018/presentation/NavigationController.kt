@@ -123,6 +123,10 @@ class NavigationController @Inject constructor(private val activity: AppCompatAc
         SessionDetailActivity.start(activity, session)
     }
 
+    fun navigateToSessionDetailActivity(session: Session, sharedElement: Pair<View, String>) {
+        SessionDetailActivity.start(activity, session, sharedElement)
+    }
+
     fun navigateToSessionsFeedbackActivity(session: Session.SpeechSession) {
         SessionsFeedbackActivity.start(activity, session)
     }

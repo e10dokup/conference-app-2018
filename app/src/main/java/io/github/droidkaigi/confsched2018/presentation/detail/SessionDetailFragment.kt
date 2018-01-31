@@ -3,8 +3,11 @@ package io.github.droidkaigi.confsched2018.presentation.detail
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.graphics.drawable.Animatable
+import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v4.view.ViewCompat
+import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +18,7 @@ import io.github.droidkaigi.confsched2018.model.Level
 import io.github.droidkaigi.confsched2018.model.Session
 import io.github.droidkaigi.confsched2018.presentation.NavigationController
 import io.github.droidkaigi.confsched2018.presentation.Result
+import io.github.droidkaigi.confsched2018.presentation.common.view.SpeakersSummaryLayout
 import io.github.droidkaigi.confsched2018.util.SessionAlarm
 import io.github.droidkaigi.confsched2018.util.ext.context
 import io.github.droidkaigi.confsched2018.util.ext.drawable
@@ -33,6 +37,9 @@ class SessionDetailFragment : Fragment(), Injectable {
     private val sessionDetailViewModel: SessionDetailViewModel by lazy {
         ViewModelProviders.of(activity!!, viewModelFactory).get(SessionDetailViewModel::class.java)
     }
+
+    val speakerSummary: SpeakersSummaryLayout
+        get() =  binding.speakerSummary
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -55,6 +62,13 @@ class SessionDetailFragment : Fragment(), Injectable {
                     bindSession(sessions[position])
                     setSessionIndicator(sessions.getOrNull(position - 1),
                             sessions.getOrNull(position + 1))
+                    if (!TextUtils.isEmpty(arguments!!.getString(EXTRA_TRANSITION_NAME))
+                            && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        ViewCompat.setTransitionName(
+                                view.findViewById<View>(R.id.speaker_summary),
+                                arguments!!.getString(EXTRA_TRANSITION_NAME))
+                        activity?.supportStartPostponedEnterTransition()
+                    }
                 }
                 is Result.Failure -> {
                     Timber.e(result.e)
@@ -117,9 +131,19 @@ class SessionDetailFragment : Fragment(), Injectable {
 
     companion object {
         const val EXTRA_SESSION_ID = "EXTRA_SESSION_ID"
+        const val EXTRA_TRANSITION_NAME = "EXTRA_TRANSITION_NAME"
+
         fun newInstance(sessionId: String): SessionDetailFragment = SessionDetailFragment().apply {
             arguments = Bundle().apply {
                 putString(EXTRA_SESSION_ID, sessionId)
+            }
+        }
+
+        fun newInstance(sessionId: String, transitionName: String): SessionDetailFragment =
+                SessionDetailFragment().apply {
+            arguments = Bundle().apply {
+                putString(EXTRA_SESSION_ID, sessionId)
+                putString(EXTRA_TRANSITION_NAME, transitionName)
             }
         }
     }
