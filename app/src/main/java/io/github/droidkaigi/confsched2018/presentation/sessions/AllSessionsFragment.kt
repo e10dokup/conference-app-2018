@@ -22,8 +22,8 @@ import io.github.droidkaigi.confsched2018.model.Session
 import io.github.droidkaigi.confsched2018.presentation.NavigationController
 import io.github.droidkaigi.confsched2018.presentation.Result
 import io.github.droidkaigi.confsched2018.presentation.common.view.TabLayoutItem
-import io.github.droidkaigi.confsched2018.presentation.sessions.SessionsFragment.CurrentSessionScroller
 import io.github.droidkaigi.confsched2018.presentation.sessions.item.DateSessionsSection
+import io.github.droidkaigi.confsched2018.presentation.sessions.SessionsFragment.CurrentSessionScroller
 import io.github.droidkaigi.confsched2018.presentation.sessions.item.SpeechSessionItem
 import io.github.droidkaigi.confsched2018.util.ProgressTimeLatch
 import io.github.droidkaigi.confsched2018.util.SessionAlarm
@@ -115,7 +115,8 @@ class AllSessionsFragment : Fragment(), Injectable, CurrentSessionScroller, TabL
             add(sessionsSection)
             setOnItemClickListener({ item, v ->
                 val sessionItem = item as? SpeechSessionItem ?: return@setOnItemClickListener
-                val sharedElement = Pair(v.findViewById<View>(R.id.speaker_summary),
+                val sharedElement = Pair(
+                        v.findViewById<View>(R.id.speaker_summary),
                         sessionItem.session.id)
                 navigationController.navigateToSessionDetailActivity(sessionItem.session, sharedElement)
             })

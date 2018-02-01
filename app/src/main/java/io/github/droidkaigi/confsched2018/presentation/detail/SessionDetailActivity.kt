@@ -56,6 +56,12 @@ class SessionDetailActivity :
 
     private val pagerAdapter = SessionDetailFragmentPagerAdapter(supportFragmentManager)
 
+    private lateinit var sessions: List<Session.SpeechSession>
+
+    val firstSessionId: String by lazy {
+        intent.getStringExtra(EXTRA_SESSION_ID)
+    }
+
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private val sharedElementCallback = object : SharedElementCallback() {
         override fun onMapSharedElements(
@@ -72,15 +78,20 @@ class SessionDetailActivity :
                 sharedElements?.put(
                         intent.getStringExtra(EXTRA_TRANSITION_NAME),
                         currentFragment.speakerSummary)
+                currentFragment.hideButton()
+
+                val data = Intent()
+                val bundle = Bundle()
+                bundle.putString("position", sessions[binding.detailSessionsPager.currentItem].id)
+                data.putExtras(bundle)
+
+                setResult(Activity.RESULT_OK, data)
             }
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        pagerAdapter.transitionName = intent.getStringExtra(EXTRA_TRANSITION_NAME)
-
         supportPostponeEnterTransition()
 
         supportActionBar?.let {
@@ -90,7 +101,7 @@ class SessionDetailActivity :
         sessionDetailViewModel.sessions.observe(this) { result ->
             when (result) {
                 is Result.Success -> {
-                    val sessions = result.data
+                    sessions = result.data
                     bindSessions(sessions)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         setEnterSharedElementCallback(sharedElementCallback)
@@ -111,8 +122,7 @@ class SessionDetailActivity :
         val firstAssign = pagerAdapter.sessions.isEmpty() && sessions.isNotEmpty()
         pagerAdapter.sessions = sessions
         if (firstAssign) {
-            val sessionId = intent.getStringExtra(EXTRA_SESSION_ID)
-            val position = sessions.indexOfFirst { it.id == sessionId }
+            val position = sessions.indexOfFirst { it.id == firstSessionId }
             binding
                     .detailSessionsPager
                     .setCurrentItem(
@@ -143,7 +153,6 @@ class SessionDetailActivity :
     class SessionDetailFragmentPagerAdapter(
             fragmentManager: FragmentManager
     ) : FragmentStatePagerAdapter(fragmentManager) {
-        var transitionName: String? = null
 
         var sessions: List<Session.SpeechSession> = listOf()
             set(value) {
@@ -152,7 +161,7 @@ class SessionDetailActivity :
             }
 
         override fun getItem(position: Int): Fragment {
-            return SessionDetailFragment.newInstance(sessions[position].id, transitionName!!)
+            return SessionDetailFragment.newInstance(sessions[position].id, sessions[position].id)
         }
 
         override fun getCount(): Int = sessions.size
@@ -166,6 +175,7 @@ class SessionDetailActivity :
     companion object {
         const val EXTRA_SESSION_ID = "EXTRA_SESSION_ID"
         const val EXTRA_TRANSITION_NAME = "EXTRA_TRANSITION_NAME"
+        const val REQUEST_POSITION = 1
 
         fun start(context: Context, session: Session) {
             context.startActivity(createIntent(context, session.id))
@@ -173,7 +183,10 @@ class SessionDetailActivity :
 
         fun start(activity: Activity, session: Session, sharedElement: Pair<View, String>) {
             val options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity, sharedElement)
-            activity.startActivity(createIntent(activity, session.id, sharedElement), options.toBundle())
+            activity.startActivityForResult(
+                    createIntent(activity, session.id, sharedElement),
+                    REQUEST_POSITION,
+                    options.toBundle())
         }
 
         fun createIntent(context: Context, sessionId: String): Intent {

@@ -11,6 +11,7 @@ import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import io.github.droidkaigi.confsched2018.R
 import io.github.droidkaigi.confsched2018.databinding.FragmentSessionDetailBinding
 import io.github.droidkaigi.confsched2018.di.Injectable
@@ -39,7 +40,7 @@ class SessionDetailFragment : Fragment(), Injectable {
     }
 
     val speakerSummary: SpeakersSummaryLayout
-        get() =  binding.speakerSummary
+        get() = binding.speakerSummary
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -62,13 +63,6 @@ class SessionDetailFragment : Fragment(), Injectable {
                     bindSession(sessions[position])
                     setSessionIndicator(sessions.getOrNull(position - 1),
                             sessions.getOrNull(position + 1))
-                    if (!TextUtils.isEmpty(arguments!!.getString(EXTRA_TRANSITION_NAME))
-                            && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        ViewCompat.setTransitionName(
-                                view.findViewById<View>(R.id.speaker_summary),
-                                arguments!!.getString(EXTRA_TRANSITION_NAME))
-                        activity?.supportStartPostponedEnterTransition()
-                    }
                 }
                 is Result.Failure -> {
                     Timber.e(result.e)
@@ -89,6 +83,26 @@ class SessionDetailFragment : Fragment(), Injectable {
         }
 
         binding.toolbar.setNavigationOnClickListener { activity?.finish() }
+
+        binding.speakerSummary.viewTreeObserver.addOnPreDrawListener(
+                object : ViewTreeObserver.OnPreDrawListener {
+                    override fun onPreDraw(): Boolean {
+                        binding.speakerSummary.viewTreeObserver.removeOnPreDrawListener(this)
+
+                        val firstSessionId = (activity as? SessionDetailActivity)?.firstSessionId
+                                ?: return true
+                        val transitionName = arguments!!.getString(EXTRA_TRANSITION_NAME)
+                        if (!TextUtils.isEmpty(arguments!!.getString(EXTRA_TRANSITION_NAME))
+                                && firstSessionId == transitionName
+                                && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            ViewCompat.setTransitionName(
+                                    view.findViewById<View>(R.id.speaker_summary),
+                                    transitionName)
+                            activity?.supportStartPostponedEnterTransition()
+                        }
+                        return true
+                    }
+                })
     }
 
     private fun bindSession(session: Session.SpeechSession) {
@@ -122,6 +136,10 @@ class SessionDetailFragment : Fragment(), Injectable {
                                     nextSession: Session.SpeechSession?) {
         binding.prevSession = prevSession
         binding.nextSession = nextSession
+    }
+
+    fun hideButton() {
+        binding.fab.visibility = View.INVISIBLE
     }
 
     interface OnClickBottomAreaListener {
