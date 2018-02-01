@@ -106,10 +106,13 @@ class AllSessionsFragment : Fragment(), Injectable, CurrentSessionScroller, TabL
         binding.sessionsRecycler.scrollToPosition(currentSessionPosition)
     }
 
+<<<<<<< HEAD
     override fun scrollToTop() {
         binding.sessionsRecycler.smoothScrollToPosition(0)
     }
 
+=======
+>>>>>>> Set Shared element on other sessions fragments
     private fun setupRecyclerView() {
         val groupAdapter = GroupAdapter<ViewHolder>().apply {
             add(sessionsSection)

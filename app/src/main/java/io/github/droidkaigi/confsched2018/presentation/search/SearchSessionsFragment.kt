@@ -4,11 +4,13 @@ import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v4.util.Pair
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.ViewHolder
+import io.github.droidkaigi.confsched2018.R
 import io.github.droidkaigi.confsched2018.databinding.FragmentSearchSessionsBinding
 import io.github.droidkaigi.confsched2018.di.Injectable
 import io.github.droidkaigi.confsched2018.model.Session
@@ -70,9 +72,12 @@ class SearchSessionsFragment : Fragment(), Injectable, TabLayoutItem {
     private fun setupRecyclerView() {
         val groupAdapter = GroupAdapter<ViewHolder>().apply {
             add(sessionsSection)
-            setOnItemClickListener({ item, _ ->
+            setOnItemClickListener({ item, v ->
                 val sessionItem = (item as? HorizontalSessionItem) ?: return@setOnItemClickListener
-                navigationController.navigateToSessionDetailActivity(sessionItem.session)
+                val sharedElement = Pair(
+                        v.findViewById<View>(R.id.speaker_summary),
+                        sessionItem.session.id)
+                navigationController.navigateToSessionDetailActivity(sessionItem.session, sharedElement)
             })
         }
         binding.searchSessionRecycler.apply {

@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.BottomSheetDialog
 import android.support.v4.app.Fragment
+import android.support.v4.util.Pair
 import android.support.v4.view.ViewCompat
 import android.support.v7.widget.LinearLayoutManager
 import android.text.TextUtils
@@ -214,9 +215,12 @@ class SpeakerDetailFragment : Fragment(), Injectable {
     private fun setupRecyclerView() {
         val groupAdapter = GroupAdapter<ViewHolder>().apply {
             add(sessionsSection)
-            setOnItemClickListener({ item, _ ->
+            setOnItemClickListener({ item, v ->
                 val sessionItem = item as? SpeechSessionItem ?: return@setOnItemClickListener
-                navigationController.navigateToSessionDetailActivity(sessionItem.session)
+                val sharedElement = Pair(
+                        v.findViewById<View>(R.id.speaker_summary),
+                        sessionItem.session.id)
+                navigationController.navigateToSessionDetailActivity(sessionItem.session, sharedElement)
             })
         }
         val linearLayoutManager = LinearLayoutManager(context)

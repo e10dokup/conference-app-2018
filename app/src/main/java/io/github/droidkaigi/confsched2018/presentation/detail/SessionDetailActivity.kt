@@ -74,18 +74,7 @@ class SessionDetailActivity :
                         binding.detailSessionsPager,
                         binding.detailSessionsPager.currentItem)
                 sharedElements?.clear()
-
-                sharedElements?.put(
-                        intent.getStringExtra(EXTRA_TRANSITION_NAME),
-                        currentFragment.speakerSummary)
                 currentFragment.hideButton()
-
-                val data = Intent()
-                val bundle = Bundle()
-                bundle.putString("position", sessions[binding.detailSessionsPager.currentItem].id)
-                data.putExtras(bundle)
-
-                setResult(Activity.RESULT_OK, data)
             }
         }
     }
@@ -174,8 +163,7 @@ class SessionDetailActivity :
 
     companion object {
         const val EXTRA_SESSION_ID = "EXTRA_SESSION_ID"
-        const val EXTRA_TRANSITION_NAME = "EXTRA_TRANSITION_NAME"
-        const val REQUEST_POSITION = 1
+        private const val EXTRA_TRANSITION_NAME = "EXTRA_TRANSITION_NAME"
 
         fun start(context: Context, session: Session) {
             context.startActivity(createIntent(context, session.id))
@@ -183,9 +171,7 @@ class SessionDetailActivity :
 
         fun start(activity: Activity, session: Session, sharedElement: Pair<View, String>) {
             val options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity, sharedElement)
-            activity.startActivityForResult(
-                    createIntent(activity, session.id, sharedElement),
-                    REQUEST_POSITION,
+            activity.startActivity(createIntent(activity, session.id, sharedElement),
                     options.toBundle())
         }
 
@@ -195,7 +181,8 @@ class SessionDetailActivity :
             }
         }
 
-        fun createIntent(context: Context, sessionId: String, sharedElement: Pair<View, String>):
+        private fun createIntent(context: Context, sessionId: String, sharedElement: Pair<View,
+        String>):
                 Intent {
             return Intent(context, SessionDetailActivity::class.java).apply {
                 putExtra(EXTRA_SESSION_ID, sessionId)

@@ -4,6 +4,7 @@ import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v4.util.Pair
 import android.support.v7.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
@@ -78,9 +79,12 @@ class TopicDetailFragment : Fragment(), Injectable {
     private fun setupRecyclerView() {
         val groupAdapter = GroupAdapter<ViewHolder>().apply {
             add(sessionsSection)
-            setOnItemClickListener { item, _ ->
+            setOnItemClickListener { item, v ->
                 val sessionItem = item as? SpeechSessionItem ?: return@setOnItemClickListener
-                navigationController.navigateToSessionDetailActivity(sessionItem.session)
+                val sharedElement = Pair(
+                        v.findViewById<View>(R.id.speaker_summary),
+                        sessionItem.session.id)
+                navigationController.navigateToSessionDetailActivity(sessionItem.session, sharedElement)
             }
         }
         val linearLayoutManager = LinearLayoutManager(context)
