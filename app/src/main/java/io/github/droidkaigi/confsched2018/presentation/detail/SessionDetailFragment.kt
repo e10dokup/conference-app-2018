@@ -89,7 +89,6 @@ class SessionDetailFragment : Fragment(), Injectable {
                 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             initViewTransitions(view)
         }
-
     }
 
     private fun bindSession(session: Session.SpeechSession) {
