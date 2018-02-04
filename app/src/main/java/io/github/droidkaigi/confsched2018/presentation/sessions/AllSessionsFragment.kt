@@ -22,8 +22,8 @@ import io.github.droidkaigi.confsched2018.model.Session
 import io.github.droidkaigi.confsched2018.presentation.NavigationController
 import io.github.droidkaigi.confsched2018.presentation.Result
 import io.github.droidkaigi.confsched2018.presentation.common.view.TabLayoutItem
-import io.github.droidkaigi.confsched2018.presentation.sessions.item.DateSessionsSection
 import io.github.droidkaigi.confsched2018.presentation.sessions.SessionsFragment.CurrentSessionScroller
+import io.github.droidkaigi.confsched2018.presentation.sessions.item.DateSessionsSection
 import io.github.droidkaigi.confsched2018.presentation.sessions.item.SpeechSessionItem
 import io.github.droidkaigi.confsched2018.util.ProgressTimeLatch
 import io.github.droidkaigi.confsched2018.util.SessionAlarm
@@ -106,13 +106,10 @@ class AllSessionsFragment : Fragment(), Injectable, CurrentSessionScroller, TabL
         binding.sessionsRecycler.scrollToPosition(currentSessionPosition)
     }
 
-<<<<<<< HEAD
     override fun scrollToTop() {
         binding.sessionsRecycler.smoothScrollToPosition(0)
     }
 
-=======
->>>>>>> Set Shared element on other sessions fragments
     private fun setupRecyclerView() {
         val groupAdapter = GroupAdapter<ViewHolder>().apply {
             add(sessionsSection)
@@ -121,7 +118,9 @@ class AllSessionsFragment : Fragment(), Injectable, CurrentSessionScroller, TabL
                 val sharedElement = Pair(
                         v.findViewById<View>(R.id.speaker_summary),
                         sessionItem.session.id)
-                navigationController.navigateToSessionDetailActivity(sessionItem.session, sharedElement)
+                navigationController.navigateToSessionDetailActivity(
+                        sessionItem.session,
+                        sharedElement)
             })
         }
         binding.sessionsRecycler.apply {

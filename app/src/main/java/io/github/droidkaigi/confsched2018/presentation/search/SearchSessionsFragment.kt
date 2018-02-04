@@ -77,7 +77,9 @@ class SearchSessionsFragment : Fragment(), Injectable, TabLayoutItem {
                 val sharedElement = Pair(
                         v.findViewById<View>(R.id.speaker_summary),
                         sessionItem.session.id)
-                navigationController.navigateToSessionDetailActivity(sessionItem.session, sharedElement)
+                navigationController.navigateToSessionDetailActivity(
+                        sessionItem.session,
+                        sharedElement)
             })
         }
         binding.searchSessionRecycler.apply {

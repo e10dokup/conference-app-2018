@@ -126,7 +126,9 @@ class RoomSessionsFragment : Fragment(), Injectable, CurrentSessionScroller, Tab
                 val sharedElement = Pair(
                         v.findViewById<View>(R.id.speaker_summary),
                         sessionItem.session.id)
-                navigationController.navigateToSessionDetailActivity(sessionItem.session, sharedElement)
+                navigationController.navigateToSessionDetailActivity(
+                        sessionItem.session,
+                        sharedElement)
             })
         }
         binding.sessionsRecycler.apply {

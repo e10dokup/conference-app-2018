@@ -1,5 +1,6 @@
 package io.github.droidkaigi.confsched2018.presentation.detail
 
+import android.annotation.TargetApi
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.graphics.drawable.Animatable
@@ -11,7 +12,6 @@ import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewTreeObserver
 import io.github.droidkaigi.confsched2018.R
 import io.github.droidkaigi.confsched2018.databinding.FragmentSessionDetailBinding
 import io.github.droidkaigi.confsched2018.di.Injectable
@@ -19,8 +19,8 @@ import io.github.droidkaigi.confsched2018.model.Level
 import io.github.droidkaigi.confsched2018.model.Session
 import io.github.droidkaigi.confsched2018.presentation.NavigationController
 import io.github.droidkaigi.confsched2018.presentation.Result
-import io.github.droidkaigi.confsched2018.presentation.common.view.SpeakersSummaryLayout
 import io.github.droidkaigi.confsched2018.util.SessionAlarm
+import io.github.droidkaigi.confsched2018.util.ext.addOnetimeOnPreDrawListener
 import io.github.droidkaigi.confsched2018.util.ext.context
 import io.github.droidkaigi.confsched2018.util.ext.drawable
 import io.github.droidkaigi.confsched2018.util.ext.observe
@@ -38,9 +38,6 @@ class SessionDetailFragment : Fragment(), Injectable {
     private val sessionDetailViewModel: SessionDetailViewModel by lazy {
         ViewModelProviders.of(activity!!, viewModelFactory).get(SessionDetailViewModel::class.java)
     }
-
-    val speakerSummary: SpeakersSummaryLayout
-        get() = binding.speakerSummary
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -84,25 +81,15 @@ class SessionDetailFragment : Fragment(), Injectable {
 
         binding.toolbar.setNavigationOnClickListener { activity?.finish() }
 
-        binding.speakerSummary.viewTreeObserver.addOnPreDrawListener(
-                object : ViewTreeObserver.OnPreDrawListener {
-                    override fun onPreDraw(): Boolean {
-                        binding.speakerSummary.viewTreeObserver.removeOnPreDrawListener(this)
+        val firstSessionId = (activity as? SessionDetailActivity)?.firstSessionId ?: return
+        val transitionName = arguments!!.getString(EXTRA_TRANSITION_NAME)
 
-                        val firstSessionId = (activity as? SessionDetailActivity)?.firstSessionId
-                                ?: return true
-                        val transitionName = arguments!!.getString(EXTRA_TRANSITION_NAME)
-                        if (!TextUtils.isEmpty(arguments!!.getString(EXTRA_TRANSITION_NAME))
-                                && firstSessionId == transitionName
-                                && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            ViewCompat.setTransitionName(
-                                    view.findViewById<View>(R.id.speaker_summary),
-                                    transitionName)
-                            activity?.supportStartPostponedEnterTransition()
-                        }
-                        return true
-                    }
-                })
+        if (!TextUtils.isEmpty(transitionName)
+                && firstSessionId == transitionName
+                && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            initViewTransitions(view)
+        }
+
     }
 
     private fun bindSession(session: Session.SpeechSession) {
@@ -140,6 +127,16 @@ class SessionDetailFragment : Fragment(), Injectable {
 
     fun hideButton() {
         binding.fab.visibility = View.INVISIBLE
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private fun initViewTransitions(view: View) {
+        binding.speakerSummary.addOnetimeOnPreDrawListener {
+            ViewCompat.setTransitionName(
+                    view.findViewById<View>(R.id.speaker_summary),
+                    arguments!!.getString(EXTRA_TRANSITION_NAME))
+            activity?.supportStartPostponedEnterTransition()
+        }
     }
 
     interface OnClickBottomAreaListener {

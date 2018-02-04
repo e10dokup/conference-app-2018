@@ -40,8 +40,6 @@ class SessionDetailActivity :
     @Inject lateinit var viewModelFactory: ViewModelProvider.Factory
     @Inject lateinit var drawerMenu: DrawerMenu
 
-    private var backPressed = false
-
     private val binding: ActivitySessionDetailBinding by lazy {
         DataBindingUtil
                 .setContentView<ActivitySessionDetailBinding>(
@@ -62,23 +60,6 @@ class SessionDetailActivity :
         intent.getStringExtra(EXTRA_SESSION_ID)
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private val sharedElementCallback = object : SharedElementCallback() {
-        override fun onMapSharedElements(
-                names: MutableList<String>?,
-                sharedElements: MutableMap<String, View>?) {
-            super.onMapSharedElements(names, sharedElements)
-
-            if (backPressed) {
-                val currentFragment = pagerAdapter.findFragmentByPosition(
-                        binding.detailSessionsPager,
-                        binding.detailSessionsPager.currentItem)
-                sharedElements?.clear()
-                currentFragment.hideButton()
-            }
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportPostponeEnterTransition()
@@ -93,9 +74,8 @@ class SessionDetailActivity :
                     sessions = result.data
                     bindSessions(sessions)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        setEnterSharedElementCallback(sharedElementCallback)
+                        removeSharedElements()
                     }
-
                 }
                 is Result.Failure -> {
                     Timber.e(result.e)
@@ -121,11 +101,26 @@ class SessionDetailActivity :
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private fun removeSharedElements() {
+        setEnterSharedElementCallback(object : SharedElementCallback() {
+            override fun onMapSharedElements(
+                    names: MutableList<String>?,
+                    sharedElements: MutableMap<String, View>?) {
+                super.onMapSharedElements(names, sharedElements)
+
+                val currentFragment = pagerAdapter.findFragmentByPosition(
+                        binding.detailSessionsPager,
+                        binding.detailSessionsPager.currentItem)
+                sharedElements?.clear()
+                currentFragment.hideButton()
+            }
+        })
+    }
 
     override fun supportFragmentInjector(): AndroidInjector<Fragment> = dispatchingAndroidInjector
 
     override fun onBackPressed() {
-        backPressed = true
         if (drawerMenu.closeDrawerIfNeeded()) {
             super.onBackPressed()
         }
@@ -158,7 +153,6 @@ class SessionDetailActivity :
         fun findFragmentByPosition(viewPager: ViewPager, position: Int): SessionDetailFragment {
             return instantiateItem(viewPager, position) as SessionDetailFragment
         }
-
     }
 
     companion object {
@@ -170,9 +164,11 @@ class SessionDetailActivity :
         }
 
         fun start(activity: Activity, session: Session, sharedElement: Pair<View, String>) {
-            val options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity, sharedElement)
-            activity.startActivity(createIntent(activity, session.id, sharedElement),
-                    options.toBundle())
+            val options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                    activity,
+                    sharedElement)
+            val intent = createIntent(activity, session.id, sharedElement)
+            activity.startActivity(intent, options.toBundle())
         }
 
         fun createIntent(context: Context, sessionId: String): Intent {
@@ -189,6 +185,5 @@ class SessionDetailActivity :
                 putExtra(EXTRA_TRANSITION_NAME, sharedElement.second)
             }
         }
-
     }
 }
